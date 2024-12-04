@@ -1,11 +1,11 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { MemberAuthType, MemberStatus, MemberType } from '../libs/enums/member.enum';
 
 const MemberSchema = new Schema(
 	{
 		memberType: {
 			type: String,
-			enum: MemberType.USER,
+			enum: MemberType,
 			default: MemberType.USER,
 		},
 
@@ -24,19 +24,19 @@ const MemberSchema = new Schema(
 		memberPhone: {
 			type: String,
 			index: { unique: true, sparse: true },
-			require: true,
+			required: true,
 		},
 
 		memberNick: {
 			type: String,
 			index: { unique: true, sparse: true },
-			require: true,
+			required: true,
 		},
 
 		memberPassword: {
 			type: String,
-			select: false,
-			require: true,
+			selelct: false,
+			required: true,
 		},
 
 		memberFullName: {
@@ -46,6 +46,10 @@ const MemberSchema = new Schema(
 		memberImage: {
 			type: String,
 			default: '',
+		},
+
+		memberAddress: {
+			type: String,
 		},
 
 		memberDesc: {
@@ -67,7 +71,7 @@ const MemberSchema = new Schema(
 			default: 0,
 		},
 
-		memberFollowing: {
+		memberFollowings: {
 			type: Number,
 			default: 0,
 		},
@@ -107,7 +111,7 @@ const MemberSchema = new Schema(
 			default: 0,
 		},
 
-		deleteAt: {
+		deletedAt: {
 			type: Date,
 		},
 	},

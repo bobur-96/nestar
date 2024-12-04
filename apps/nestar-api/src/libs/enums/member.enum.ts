@@ -17,7 +17,7 @@ export enum MemberStatus {
 }
 
 registerEnumType(MemberStatus, {
-	name: 'MemberType',
+	name: 'MemberStatus',
 });
 
 export enum MemberAuthType {
@@ -27,5 +27,5 @@ export enum MemberAuthType {
 }
 
 registerEnumType(MemberAuthType, {
-	name: 'MemberType',
+	name: 'MemberAuthType',
 });
