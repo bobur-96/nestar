@@ -49,7 +49,7 @@ class AISearch {
 	text?: string;
 }
 @InputType()
-export class AgentsInquery {
+export class AgentsInquiry {
 	@IsNotEmpty()
 	@Min(1)
 	@Field(() => Int)
@@ -89,7 +89,7 @@ class MISearch {
 	text?: string;
 }
 @InputType()
-export class MembersInquery {
+export class MembersInquiry {
 	@IsNotEmpty()
 	@Min(1)
 	@Field(() => Int)
