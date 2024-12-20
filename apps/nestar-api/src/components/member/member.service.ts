@@ -8,9 +8,13 @@ import { Direction, Message } from '../../libs/enums/common.enum';
 import { AuthService } from '../auth/auth.service';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
 import { StatisticModifier, T } from '../../libs/types/common';
-import { ViewGroup } from '../../libs/enums/view.enum';
-import { ViewInput } from '../view/view.input';
+
 import { ViewService } from '../view/view.service';
+import { ViewInput } from '../../libs/dto/view/view.input';
+import { ViewGroup } from '../../libs/enums/view.enum';
+import { LikeInput } from '../../libs/dto/like/like.input';
+import { LikeGroup } from '../../libs/enums/like.enum';
+import { LikeService } from '../like/like.service';
 
 @Injectable()
 export class MemberService {
@@ -18,15 +22,14 @@ export class MemberService {
 		@InjectModel('Member') private readonly memberModel: Model<Member>,
 		private authService: AuthService,
 		private viewService: ViewService,
+		private likeService: LikeService,
 	) {}
 
 	public async signup(input: MemberInput): Promise<Member> {
 		input.memberPassword = await this.authService.hashPassword(input.memberPassword);
+
 		try {
 			const result = await this.memberModel.create(input);
-
-			// TODO: Authentication via TOKEN
-
 			result.accessToken = await this.authService.createToken(result);
 			return result;
 		} catch (err) {
@@ -37,6 +40,7 @@ export class MemberService {
 
 	public async login(input: LoginInput): Promise<Member> {
 		const { memberNick, memberPassword } = input;
+
 		const response: Member = await this.memberModel
 			.findOne({ memberNick: memberNick })
 			.select('+memberPassword')
@@ -48,9 +52,9 @@ export class MemberService {
 			throw new InternalServerErrorException(Message.BLOCKED_USER);
 		}
 
-		// TODO Compare password
-		const isMatch = await this.authService.comparePassword(input.memberPassword, response.memberPassword);
+		const isMatch = await this.authService.comparePasswords(input.memberPassword, response.memberPassword);
 		if (!isMatch) throw new InternalServerErrorException(Message.WRONG_PASSWORD);
+
 		response.accessToken = await this.authService.createToken(response);
 
 		return response;
@@ -60,6 +64,7 @@ export class MemberService {
 		const result = await this.memberModel
 			.findOneAndUpdate({ _id: memberId, memberStatus: MemberStatus.ACTIVE }, input, { new: true })
 			.exec();
+
 		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
 		result.accessToken = await this.authService.createToken(result);
 		return result;
@@ -71,15 +76,14 @@ export class MemberService {
 		return await this.memberModel.findByIdAndUpdate(_id, { $inc: { [targetKey]: modifier } }, { new: true }).exec();
 	}
 
-	public async getMember(memberId: ObjectId, targetId: ObjectId): Promise<any> {
+	public async getMember(memberId: ObjectId, targetId: ObjectId): Promise<Member> {
 		const search: T = {
 			_id: targetId,
 			memberStatus: {
 				$in: [MemberStatus.ACTIVE, MemberStatus.BLOCK],
 			},
 		};
-
-		const targetMember = await this.memberModel.findOne(search).lean().exec();
+		const targetMember = await this.memberModel.findOne(search).exec();
 		if (!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
 		if (memberId) {
@@ -93,8 +97,11 @@ export class MemberService {
 			}
 
 			// meLiked
+			const likeInput = { memberId: memberId, likeRefId: targetId, likeGroup: LikeGroup.MEMBER };
+			targetMember.meLiked = await this.likeService.checkLikeExistence(likeInput);
 			// meFollowed
 		}
+
 		return targetMember;
 	}
 
@@ -121,9 +128,24 @@ export class MemberService {
 			.exec();
 		console.log('result:', result);
 		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+
 		return result[0];
 	}
 
+	public async likeTargetMember(memberId: ObjectId, likeRefId: ObjectId): Promise<Member> {
+		const target: Member = await this.memberModel.findOne({ _id: likeRefId, memberStatus: MemberStatus.ACTIVE }).exec();
+		if (!target) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		const input: LikeInput = { memberId: memberId, likeRefId: likeRefId, likeGroup: LikeGroup.MEMBER };
+
+		// LIKE TOGGLE via Like modules
+		const modifier: number = await this.likeService.toggleLike(input);
+		const result = await this.memberStatsEditor({ _id: likeRefId, targetKey: 'memberLikes', modifier: modifier });
+
+		if (!result) throw new InternalServerErrorException(Message.SOMETHING_WENT_WRONG);
+		return result;
+	}
+
+	/** ADMIN **/
 	public async getAllMembersByAdmin(input: MembersInquiry): Promise<Members> {
 		const { memberStatus, memberType, text } = input.search;
 		const match: T = {};
@@ -134,10 +156,12 @@ export class MemberService {
 
 		if (text) match.memberNick = { $regex: new RegExp(text, 'i') };
 		console.log('match:', match);
+
 		const result = await this.memberModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: sort },
+
 				{
 					$facet: {
 						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
@@ -147,15 +171,15 @@ export class MemberService {
 			])
 			.exec();
 		console.log('result:', result);
-
 		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+
 		return result[0];
 	}
 
 	public async updateMemberByAdmin(input: MemberUpdate): Promise<Member> {
 		const result: Member = await this.memberModel.findOneAndUpdate({ _id: input }, input, { new: true }).exec();
-
 		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
+
 		return result;
 	}
 }

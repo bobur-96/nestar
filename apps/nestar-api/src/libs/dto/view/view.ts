@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
-import { ViewGroup } from '../../libs/enums/view.enum';
+import { ViewGroup } from '../../enums/view.enum';
 
 @ObjectType()
 export class View {

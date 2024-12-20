@@ -18,16 +18,13 @@ import { T } from './libs/types/common';
 			uploads: false,
 			autoSchemaFile: true,
 			formatError: (error: T) => {
-				const graphQLFormattedError = {
+				const graphQLformattedError = {
 					code: error?.extensions.code,
 					message:
-						error?.extensions?.exception?.response?.message ||
-						error?.extensions?.exception?.response?.message ||
-						error?.message,
+						error?.extensions?.exception?.response?.message || error?.extensions?.response?.message || error?.message,
 				};
-				console.log('GRAPHQL GLOBAL ERR', graphQLFormattedError);
-
-				return graphQLFormattedError;
+				console.log('GRAPHQL GLOBAL ERROR:', graphQLformattedError);
+				return graphQLformattedError;
 			},
 		}),
 		ComponentsModule,

@@ -6,15 +6,18 @@ import { ViewModule } from '../view/view.module';
 import { PropertyResolver } from './property.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MemberModule } from '../member/member.module';
+import { LikeModule } from '../like/like.module';
 
-@Module({})
 @Module({
 	imports: [
 		MongooseModule.forFeature([{ name: 'Property', schema: PropertySchema }]),
 		AuthModule,
 		ViewModule,
 		MemberModule,
+		LikeModule,
 	],
+
 	providers: [PropertyResolver, PropertyService],
+	exports: [PropertyService],
 })
 export class PropertyModule {}

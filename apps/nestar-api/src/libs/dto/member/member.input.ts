@@ -48,6 +48,7 @@ class AISearch {
 	@Field(() => String, { nullable: true })
 	text?: string;
 }
+
 @InputType()
 export class AgentsInquiry {
 	@IsNotEmpty()
@@ -88,6 +89,7 @@ class MISearch {
 	@Field(() => String, { nullable: true })
 	text?: string;
 }
+
 @InputType()
 export class MembersInquiry {
 	@IsNotEmpty()

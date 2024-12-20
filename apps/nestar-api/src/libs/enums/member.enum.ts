@@ -5,27 +5,18 @@ export enum MemberType {
 	AGENT = 'AGENT',
 	ADMIN = 'ADMIN',
 }
-
-registerEnumType(MemberType, {
-	name: 'MemberType',
-});
+registerEnumType(MemberType, { name: 'MemberType' });
 
 export enum MemberStatus {
 	ACTIVE = 'ACTIVE',
 	BLOCK = 'BLOCK',
 	DELETE = 'DELETE',
 }
-
-registerEnumType(MemberStatus, {
-	name: 'MemberStatus',
-});
+registerEnumType(MemberStatus, { name: 'MemberStatus' });
 
 export enum MemberAuthType {
 	PHONE = 'PHONE',
 	EMAIL = 'EMAIL',
 	TELEGRAM = 'TELEGRAM',
 }
-
-registerEnumType(MemberAuthType, {
-	name: 'MemberAuthType',
-});
+registerEnumType(MemberAuthType, { name: 'MemberAuthType' });

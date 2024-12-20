@@ -7,6 +7,9 @@
 		"webpack": true,
 		"tsConfigPath": "apps/nestar-api/tsconfig.app.json"
 	},
+	"generateOptions": {
+		"spec": false
+	},
 	"monorepo": true,
 	"root": "apps/nestar-api",
 	"projects": {
