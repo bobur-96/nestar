@@ -16,3 +16,5 @@ async function bootstrap() {
 	await app.listen(process.env.PORT_API ?? 3000);
 }
 bootstrap();
+
+// client, dto, server, schema validation
